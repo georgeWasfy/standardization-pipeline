@@ -1,0 +1,5 @@
+confluent-kafka
+transformers
+torch==2.2.2
+huggingface_hub[hf_xet]
+numpy<2
