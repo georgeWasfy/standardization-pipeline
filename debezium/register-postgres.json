@@ -14,6 +14,7 @@
     "slot.name": "debezium_slot",
     "schema.include.list": "public",
     "table.include.list": "public.member",
-    "topic.prefix": "testdb_cdc"
+    "topic.prefix": "testdb_cdc",
+    "snapshot.mode": "never"
   }
 }

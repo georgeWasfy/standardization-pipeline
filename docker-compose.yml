@@ -81,20 +81,20 @@ services:
     ports:
       - "5000:5000"
 
-  # search:
-  #   build: ./search
-  #   container_name: search
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - postgres
-  #   environment:
-  #     DB_HOST: db
-  #     DB_USER: postgres
-  #     DB_PASSWORD: secretpassword
-  #     DB_NAME: testdb
-  #     DB_PORT: 5432
+  search:
+    build: ./search
+    container_name: search
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: secretpassword
+      DB_NAME: testdb
+      DB_PORT: 5432
 
 volumes:
   kafka_data:
