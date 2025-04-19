@@ -10,10 +10,10 @@
     "database.dbname": "testdb",
     "database.server.name": "dbserver1",
     "plugin.name": "pgoutput",
-    "publication.name": "employee_publication",
+    "publication.name": "member_publication",
     "slot.name": "debezium_slot",
     "schema.include.list": "public",
-    "table.include.list": "public.employees",
+    "table.include.list": "public.member",
     "topic.prefix": "testdb_cdc"
   }
 }
