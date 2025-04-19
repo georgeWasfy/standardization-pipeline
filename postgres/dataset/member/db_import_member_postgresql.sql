@@ -1,0 +1,21 @@
+UPDATE member
+SET
+  name = u(name),
+  first_name = u(first_name),
+  last_name = u(last_name),
+  title = u(title),
+  url = u(url),
+  hash = u(hash),
+  location = u(location),
+  industry = u(industry),
+  summary = u(summary),
+  connections = u(connections),
+  recommendations_count = u(recommendations_count),
+  logo_url = u(logo_url),
+  country = u(country),
+  member_shorthand_name = u(member_shorthand_name),
+  member_shorthand_name_hash = u(member_shorthand_name_hash),
+  canonical_url = u(canonical_url),
+  canonical_hash = u(canonical_hash),
+  canonical_shorthand_name = u(canonical_shorthand_name),
+  canonical_shorthand_name_hash = u(canonical_shorthand_name_hash);
