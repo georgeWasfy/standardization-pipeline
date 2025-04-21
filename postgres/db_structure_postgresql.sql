@@ -43,6 +43,11 @@ CREATE TABLE standardized_title (
     PRIMARY KEY ("id")
 );
 
+-- Create new table for backfill checkpoint
+CREATE TABLE backfill_checkpoint (
+    "backfill_offset" INTEGER
+);
+
 CREATE TABLE "member_also_viewed" (
   "id" bigserial,
   "member_id" bigint NOT NULL,

@@ -81,6 +81,46 @@ services:
     ports:
       - "5000:5000"
 
+  airflow-webserver:
+    build: ./airflow
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:secretpassword@postgres/testdb
+      AIRFLOW__CORE__FERNET_KEY: "7r4em_XyS2IMUhwlmJ5NjsNG7mHewDZL4xDJA6CCN68="
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__DEFAULT_USER: airflow
+      AIRFLOW__WEBSERVER__DEFAULT_PASSWORD: airflow
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "e3xFGTPd-W3jYrU4mMKhx6JxT1o3pQM1gpk5OjLyJVo"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create --username airflow --password airflow --firstname Air --lastname Flow --role Admin --email admin@example.com &&
+        airflow webserver
+      "
+
+  airflow-scheduler:
+    build: ./airflow
+    restart: always
+    depends_on:
+      - airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:secretpassword@postgres/testdb
+      AIRFLOW__CORE__FERNET_KEY: "7r4em_XyS2IMUhwlmJ5NjsNG7mHewDZL4xDJA6CCN68="
+      AIRFLOW__WEBSERVER__SECRET_KEY: "e3xFGTPd-W3jYrU4mMKhx6JxT1o3pQM1gpk5OjLyJVo"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: ["scheduler"]
+
   search:
     build: ./search
     container_name: search

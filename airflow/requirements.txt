@@ -1,0 +1,12 @@
+apache-airflow==2.8.1
+psycopg2-binary==2.9.3
+apache-airflow-providers-postgres==5.5.0
+SQLAlchemy==1.4.49
+transformers
+huggingface_hub[hf_xet]
+numpy<2
+pendulum==2.1.2
+pydantic==2.6.4
+--find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+torch==2.1.1+cpu
+
