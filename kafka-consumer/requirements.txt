@@ -1,6 +1,2 @@
 confluent-kafka
-transformers
-torch==2.2.2
-huggingface_hub[hf_xet]
-numpy<2
-psycopg2-binary==2.9.3
+requests
