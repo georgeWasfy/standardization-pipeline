@@ -44,11 +44,16 @@ def process_title(title):
 # Function to insert a record into the standardized_title table
 def insert_standardized_title(session, record):
     try:
-        title_update_query = f"""
+        title_update_query = """
             INSERT INTO standardized_title (job_title, job_department, job_function, job_seniority)
-            VALUES ({record["job_title"]}, {record["job_department"]}, {record["job_function"]}, {record["job_seniority"]});
+            VALUES (:job_title, :job_department, :job_function, :job_seniority)
         """
-        session.execute(title_update_query)
+        session.execute(title_update_query, {
+            "job_title": record["job_title"],
+            "job_department": record["job_department"],
+            "job_function": record["job_function"],
+            "job_seniority": record["job_seniority"],
+        })
         session.commit()
         print(f"Record inserted successfully: {record}")
     except Exception as e:

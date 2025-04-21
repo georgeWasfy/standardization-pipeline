@@ -3,15 +3,18 @@ import json
 from confluent_kafka import Consumer
 import requests
 
-hostname = "postgres"
-port = "5432"
-username = "postgres"
-password = "secretpassword"
-database = "testdb"
+hostname = os.getenv("POSTGRES_HOST", "postgres")
+port = os.getenv("POSTGRES_PORT", "5432")
+username = os.getenv("POSTGRES_USER", "postgres")
+password = os.getenv("POSTGRES_PASSWORD", "secretpassword")
+database = os.getenv("POSTGRES_DB", "testdb")
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "testdb_cdc.public.member")
 AIRFLOW_DAG_TRIGGER_URL = os.getenv("AIRFLOW_DAG_TRIGGER_URL", "http://airflow-webserver:8080/api/v1/dags/job_standardization_online_strategy/trigger")
+AIRFLOW_DAG_USER = os.getenv("AIRFLOW_DAG_USER", "User")
+AIRFLOW_DAG_PASSWORD = os.getenv("AIRFLOW_DAG_PASSWORD", "password")
+
 
 conf = {
     'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
@@ -25,9 +28,10 @@ consumer.subscribe([KAFKA_TOPIC])
 """Trigger Airflow DAG with received Kafka message."""
 def trigger_airflow_dag(data):
     payload = {
-        "conf": data
+        "conf": {"title": data["title"]}
     }
-    response = requests.post(AIRFLOW_DAG_TRIGGER_URL, json=payload, auth=("airflow", "airflow"))
+    print("Attempting DAG trigger")
+    response = requests.post(AIRFLOW_DAG_TRIGGER_URL, json=payload, auth=(AIRFLOW_DAG_USER, AIRFLOW_DAG_PASSWORD))
     if response.status_code == 200:
         print(f"DAG triggered successfully: {response.json()}")
     else:

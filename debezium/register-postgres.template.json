@@ -3,18 +3,18 @@
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "tasks.max": "1",
-    "database.hostname": "postgres",
-    "database.port": "5432",
-    "database.user": "postgres",
-    "database.password": "secretpassword",
-    "database.dbname": "testdb",
+    "database.hostname": "${POSTGRES_HOST}",
+    "database.port": "${POSTGRES_PORT}",
+    "database.user": "${POSTGRES_USER}",
+    "database.password": "${POSTGRES_PASSWORD}",
+    "database.dbname": "${POSTGRES_DB}",
     "database.server.name": "dbserver1",
     "plugin.name": "pgoutput",
     "publication.name": "member_publication",
     "slot.name": "debezium_slot",
     "schema.include.list": "public",
     "table.include.list": "public.member",
-    "topic.prefix": "testdb_cdc",
+    "topic.prefix": "${TOPIC_PREFIX}",
     "snapshot.mode": "never"
   }
 }
