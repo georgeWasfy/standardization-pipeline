@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 
 MODEL_NAME = "typeform/distilbert-base-uncased-mnli"
+MODEL_DIR = "/opt/airflow/models/typeform-mnli"
 CLASSIFIER = None
 BATCH_SIZE = 1000
 
@@ -15,17 +16,10 @@ SENIORITIES = ["Intern", "Junior", "Mid-level", "Senior", "Lead", "Manager", "Di
 
 
 def init_classifier():
-    from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+    from transformers import pipeline
     global CLASSIFIER
     if CLASSIFIER is None:
-        model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-
-        # Save to a local folder
-        model.save_pretrained("./local-models/typeform-mnli")
-        tokenizer.save_pretrained("./local-models/typeform-mnli")
-
-        CLASSIFIER = pipeline("zero-shot-classification", model="./local-models/typeform-mnli", tokenizer="./local-models/typeform-mnli")
+        CLASSIFIER = pipeline("zero-shot-classification",  model=MODEL_DIR, tokenizer=MODEL_DIR)
     return CLASSIFIER
 
 def classify_title(title):
