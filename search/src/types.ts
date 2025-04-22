@@ -1,4 +1,4 @@
-type Member = {
+export type Member = {
   id: string;
   name: string;
   first_name: string;
@@ -28,6 +28,19 @@ type Member = {
   canonical_shorthand_name: string;
   canonical_shorthand_name_hash: string;
 };
+
+export type InsertMember = Omit<
+  Member,
+  | "id"
+  | "created"
+  | "last_response_code"
+  | "last_updated"
+  | "outdated"
+  | "deleted"
+  | "connections_count"
+  | "experience_count"
+  | "last_updated_ux"
+>;
 
 export type MemberArray = Member[];
 

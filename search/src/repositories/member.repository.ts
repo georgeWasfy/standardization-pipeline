@@ -1,6 +1,6 @@
 import db from "../config/db";
-import { MemberResponse } from "../types";
-import { Filters, Paging } from "../utils/member.filters";
+import { InsertMember, MemberResponse } from "../types";
+import { Filters, Paging } from "../middlewares/member.filters";
 
 export class MemberRepository {
   async getAll(filters?: Filters, paging?: Paging): Promise<MemberResponse> {
@@ -53,5 +53,9 @@ export class MemberRepository {
         per_page: perPage,
       },
     };
+  }
+
+  async insertMember(data: InsertMember) {
+    return db("member").insert(data);
   }
 }
