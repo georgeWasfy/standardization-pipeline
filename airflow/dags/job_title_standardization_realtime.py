@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+import re
 
 MODEL_NAME = "typeform/distilbert-base-uncased-mnli"
 MODEL_DIR = "/opt/airflow/models/typeform-mnli"
@@ -14,7 +15,15 @@ DEPARTMENTS = ["Engineering", "Sales", "Marketing", "Human Resources", "Finance"
 FUNCTIONS = ["Software Development", "Customer Support", "Product Management", "Recruitment", "Accounting"]
 SENIORITIES = ["Intern", "Junior", "Mid-level", "Senior", "Lead", "Manager", "Director", "VP", "C-level"]
 
-
+def is_probable_job_title(title):
+    if not title or len(title) < 3:
+        return False
+    if re.fullmatch(r'[\W\d_]+', title):  # Only punctuation or digits
+        return False
+    if sum(c.isalpha() for c in title) < 3:
+        return False
+    return True
+    
 def init_classifier():
     from transformers import pipeline
     global CLASSIFIER
@@ -28,6 +37,14 @@ def classify_title(title):
     func = CLASSIFIER(title, FUNCTIONS)['labels'][0]
     senior = CLASSIFIER(title, SENIORITIES)['labels'][0]
     return dept, func, senior
+
+# Function to check if a title already processed
+def title_already_exists(session, title):
+    query = """
+        SELECT 1 FROM standardized_title WHERE job_title = :job_title LIMIT 1
+    """
+    result = session.execute(query, {"job_title": title}).fetchone()
+    return bool(result)
 
 def process_title(title):
     department, function, seniority = classify_title(title)
@@ -80,8 +97,14 @@ def standardize_title(**kwargs):
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        enriched_record = process_title(title)
-        insert_standardized_title(session, enriched_record)
+        if is_probable_job_title(title):
+            if title_already_exists(session, title):
+                print(f"⚠️ '{title}' already exists. Skipping.")
+            else:
+                enriched_record = process_title(title)
+                insert_standardized_title(session, enriched_record)
+        else:
+            print(f"⏭️ Skipping invalid job title: '{title}'")
 
     finally:
         session.close()

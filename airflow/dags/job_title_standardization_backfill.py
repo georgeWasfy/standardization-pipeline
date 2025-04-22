@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+import re
 
 MODEL_NAME = "typeform/distilbert-base-uncased-mnli"
 MODEL_DIR = "/opt/airflow/models/typeform-mnli"
@@ -14,6 +15,14 @@ DEPARTMENTS = ["Engineering", "Sales", "Marketing", "Human Resources", "Finance"
 FUNCTIONS = ["Software Development", "Customer Support", "Product Management", "Recruitment", "Accounting"]
 SENIORITIES = ["Intern", "Junior", "Mid-level", "Senior", "Lead", "Manager", "Director", "VP", "C-level"]
 
+def is_probable_job_title(title):
+    if not title or len(title) < 3:
+        return False
+    if re.fullmatch(r'[\W\d_]+', title):  # Only punctuation or digits
+        return False
+    if sum(c.isalpha() for c in title) < 3:
+        return False
+    return True
 
 def init_classifier():
     from transformers import pipeline
@@ -22,14 +31,20 @@ def init_classifier():
         CLASSIFIER = pipeline("zero-shot-classification",  model=MODEL_DIR, tokenizer=MODEL_DIR)
     return CLASSIFIER
 
-
-
 def classify_title(title):
     CLASSIFIER = init_classifier()
     dept = CLASSIFIER(title, DEPARTMENTS)['labels'][0]
     func = CLASSIFIER(title, FUNCTIONS)['labels'][0]
     senior = CLASSIFIER(title, SENIORITIES)['labels'][0]
     return dept, func, senior
+
+# Function to check if a title already processed
+def title_already_exists(session, title):
+    query = """
+        SELECT 1 FROM standardized_title WHERE job_title = :job_title LIMIT 1
+    """
+    result = session.execute(query, {"job_title": title}).fetchone()
+    return bool(result)
 
 # Function to insert a record into the standardized_title table
 def insert_standardized_title(session, record):
@@ -95,18 +110,17 @@ def insert_or_update_checkpoint(session, offset, batch_size):
         session.commit()
 
 # Function to process the titles fetched from the batch
-def process_titles(titles):
-    for row in titles:
-        department, function, seniority = classify_title(row['title'])
+def process_title(row):
+    department, function, seniority = classify_title(row['title'])
 
-        enriched_record = {
-            "job_title": row['title'],
-            "job_department": department,
-            "job_function": function,
-            "job_seniority": seniority
-        }
-        print("Enriched record:", enriched_record)
-        return enriched_record
+    enriched_record = {
+        "job_title": row['title'],
+        "job_department": department,
+        "job_function": function,
+        "job_seniority": seniority
+    }
+    print("Enriched record:", enriched_record)
+    return enriched_record
 
 # Main function to fetch titles in batches and update checkpoint
 def fetch_and_process_batches(**kwargs):
@@ -131,14 +145,23 @@ def fetch_and_process_batches(**kwargs):
             offset = get_current_offset(session)
             titles = fetch_batch_of_titles(session, batch_size, offset)
 
-            if titles:
-                enriched_record = process_titles(titles)
-                insert_standardized_title(session, enriched_record)
-                insert_or_update_checkpoint(session, offset, batch_size)
-                offset += batch_size
-            else:
+            if not titles:
                 print("✅ No more records to process.")
                 break
+
+            for row in titles:
+                title = row["title"]
+                if not is_probable_job_title(title):
+                    print(f"⏭️ Skipping non-job title: '{title}'")
+                    continue
+                
+                if not title_already_exists(session, title):
+                    enriched_record = process_title(row)
+                    insert_standardized_title(session, enriched_record)
+
+            insert_or_update_checkpoint(session, offset, batch_size)
+            offset += batch_size
+
 
     finally:
         session.close()
