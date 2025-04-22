@@ -124,6 +124,26 @@ From the root directory, run the following command to build and start all servic
 ```sh
 docker compose up --build
 ```
+### 4. Create a Postgres Connection in Airflow UI
+
+Once all services are running, follow these steps to create a new Postgres connection in Airflow with the connection ID `testdb`:
+
+1. Open your browser and navigate to the Airflow web UI (usually at [http://localhost:8080](http://localhost:8080)).
+2. In the top navigation bar, click on **Admin**.
+3. From the dropdown, select **Connections**.
+4. Click the **+ (plus)** button to add a new connection.
+5. In the **Connection Type** dropdown, select **Postgres**.
+6. Fill in the connection details:
+    - **Connection Id:** must be `testdb`
+    - **Host:** (your Postgres host, e.g., `postgres`)
+    - **Schema:** (your database name, e.g., `maindb`)
+    - **Login:** (your Postgres username, e.g., `postgres`)
+    - **Password:** (your Postgres password)
+    - **Port:** (your Postgres port, usually `5432`)
+7. (Optional) Click the **Test Connection** button to verify the settings.
+8. Click **Save** to create the connection.
+
+---
 
 This command will build the Docker images and start the entire pipeline stack, including the orchestration, messaging, database, and classification components.
 
