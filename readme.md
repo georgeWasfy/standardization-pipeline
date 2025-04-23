@@ -77,7 +77,15 @@ curl -X POST http://localhost:3000/api/v1/member \
   - `department` — Filter members by Department.
   - `function` — Filter members by Function.
   - `seniority` — Filter members by Seniority.
+  - `page` — Page number.
+  - `per_page` — Amount of records per single page.
 - **Response:** JSON array of member records matching the specified filters.
+- **Note:** Parameters must follow this structure
+  - `filters[department]`
+  - `filters[function]`
+  - `filters[seniority]`
+  - `paging[page]`
+  - `paging[per_page]`
 - **Example CURL:** 
 ```
 curl "http://localhost:3000/api/v1/members?filters[department]=software%20development&\
