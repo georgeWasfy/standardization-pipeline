@@ -297,6 +297,7 @@ def insert_standardized_title(session, record):
         title_update_query = """
             INSERT INTO standardized_title (job_title, job_department, job_function, job_seniority)
             VALUES (:job_title, :job_department, :job_function, :job_seniority)
+            ON CONFLICT (job_title) DO NOTHING
         """
         session.execute(title_update_query, {
             "job_title": record["job_title"],

@@ -36,7 +36,7 @@ CREATE PUBLICATION member_publication FOR TABLE member;
 -- Create new table for standardized titles
 CREATE TABLE standardized_title (
     "id" SERIAL,
-    "job_title" VARCHAR(255),
+    "job_title" VARCHAR(255) UNIQUE,
     "job_function" VARCHAR(255),
     "job_department" VARCHAR(255),
     "job_seniority" VARCHAR(255),
